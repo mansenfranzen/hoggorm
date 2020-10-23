@@ -20,22 +20,35 @@ def datafolder() -> Path:
 
 
 @pytest.fixture(scope="session")
+def dump_res(datafolder):
+    """
+    Dumps information to file if reference data is missing or difference is larger than tolerance.
+    """
+
+    def dumb_it(rname, dat):
+        dumpfn = "dump_PLS1_{}.tsv".format(rname.lower())
+        np.savetxt(datafolder.joinpath(dumpfn), dat, fmt='%.9e', delimiter='\t')
+
+    return dumb_it
+
+
+@pytest.fixture(scope="session")
 def get_test_data(datafolder):
     """Helper fixture to load data files with appropriate dtype and shape.
-    
+
     """
-    
+
     def load_data(name, dtype=np.float64, reshape=None):
         mat = np.loadtxt(datafolder.joinpath(name),
                          dtype=dtype,
                          skiprows=1)
         if reshape:
             mat = mat.reshape(*reshape)
-        
+
         return mat
-        
+
     return load_data
-    
+
 
 @pytest.fixture(scope="module")
 def ldat(get_test_data):
